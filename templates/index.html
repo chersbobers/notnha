@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Imageboard - Home{% endblock %}
+
+{% block content %}
+<h2>Boards</h2>
+<div style="background: #D6DAF0; border: 1px solid #B7C5D9; padding: 8px; margin: 4px 0;">
+    {% for board in boards %}
+        <a href="{{ url_for('board_view', board_name=board.name) }}" class="board-link">
+            <strong>/{{ board.name }}/</strong> - {{ board.title }}
+        </a><br>
+        <small>{{ board.description }}</small><br><br>
+    {% endfor %}
+    
+    {% if not boards %}
+        <p>No boards available. <a href="{{ url_for('create_board') }}">Create one?</a></p>
+    {% endif %}
+</div>
+
+<div style="margin-top: 16px;">
+    <a href="{{ url_for('create_board') }}" style="color: #34345C;">[Create New Board]</a>
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Create Board{% endblock %}
+
+{% block content %}
+<h2>Create New Board</h2>
+
+<form method="POST">
+    <table class="form-table">
+        <tr>
+            <td><strong>Board Name</strong></td>
+            <td><input type="text" name="name" required maxlength="10" placeholder="b"></td>
+        </tr>
+        <tr>
+            <td><strong>Board Title</strong></td>
+            <td><input type="text" name="title" required maxlength="100" placeholder="Random"></td>
+        </tr>
+        <tr>
+            <td><strong>Description</strong></td>
+            <td><textarea name="description" rows="3" cols="40"></textarea></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><input type="submit" value="Create Board"></td>
+        </tr>
+    </table>
+</form>
+
+<div style="margin-top: 16px;">
+    <a href="{{ url_for('index') }}">[Back to Home]</a>
+</div>
+{% endblock %}

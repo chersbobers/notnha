@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}{{ thread.subject }} - /{{ board.name }}/{% endblock %}
+
+{% block content %}
+<div style="text-align: center; margin: 8px 0;">
+    <a href="{{ url_for('board_view', board_name=board.name) }}">[Return to /{{ board.name }}/]</a>
+</div>
+
+<!-- Reply Form -->
+<form method="POST" action="{{ url_for('create_post', board_name=board.name) }}" enctype="multipart/form-data">
+    <input type="hidden" name="thread_id" value="{{ thread.id }}">
+    <table class="form-table">
+        <tr>
+            <td><strong>Name</strong></td>
+            <td><input type="text" name="name" placeholder="Anonymous" size="28"></td>
+        </tr>
+        <tr>
+            <td><strong>Email</strong></td>
+            <td><input type="email" name="email" size="28"></td>
+        </tr>
+        <tr>
+            <td><strong>Subject</strong></td>
+            <td><input type="text" name="subject" size="35"></td>
+        </tr>
+        <tr>
+            <td><strong>Comment</strong></td>
+            <td><textarea name="comment" rows="4" cols="48"></textarea></td>
+        </tr>
+        <tr>
+            <td><strong>File</strong></td>
+            <td><input type="file" name="file" accept="image/*,video/*"></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><input type="submit" value="Post Reply"></td>
+        </tr>
+    </table>
+</form>
+
+<!-- Posts -->
+{% for post in posts %}
+    <div class="post" id="post{{ post.post_number }}">
+        <div class="post-info">
+            {% if post.subject %}
+                <span class="subject">{{ post.subject }}</span>
+            {% endif %}
+            <span class="name">{{ post.name }}</span>
+            {% if post.email %}
+                <a href="mailto:{{ post.email }}" style="color: #117743;">{{ post.email }}</a>
+            {% endif %}
+            {{ post.created_at.strftime('%m/%d/%y(%a)%H:%M:%S') }}
+            <span class="post-no">No.{{ post.post_number }}</span>
+            <a href="#post{{ post.post_number }}" onclick="quotePost({{ post.post_number }})">[Quote]</a>
+        </div>
+        
+        {% if post.filename %}
+            <div class="file-info">
+                File: {{ post.original_filename }} ({{ post.file_size }} bytes)
+            </div>
+            <div>
+                <img src="{{ url_for('static', filename='uploads/' + post.filename) }}" 
+                     class="image" alt="Image" onclick="expandImage(this)">
+            </div>
+        {% endif %}
+        
+        <div class="comment">{{ post.comment | safe }}</div>
+    </div>
+    <hr style="border: 1px solid #B7C5D9;">
+{% endfor %}
+
+<script>
+function quotePost(postNo) {
+    const comment = document.querySelector('textarea[name="comment"]');
+    comment.value += '>>' + postNo + '\n';
+    comment.focus();
+}
+
+function expandImage(img) {
+    if (img.style.maxWidth) {
+        img.style.maxWidth = '';
+        img.style.maxHeight = '';
+    } else {
+        img.style.maxWidth = '250px';
+        img.style.maxHeight = '250px';
+    }
+}
+</script>
+{% endblock %}

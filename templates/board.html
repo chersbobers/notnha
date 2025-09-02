@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}/{{ board.name }}/ - {{ board.title }}{% endblock %}
+
+{% block content %}
+<div style="text-align: center; margin: 8px 0;">
+    <h1>/{{ board.name }}/ - {{ board.title }}</h1>
+    <p>{{ board.description }}</p>
+</div>
+
+<!-- New Thread Form -->
+<form method="POST" action="{{ url_for('create_post', board_name=board.name) }}" enctype="multipart/form-data">
+    <table class="form-table" style="width: 100%;">
+        <tr>
+            <td><strong>Name</strong></td>
+            <td><input type="text" name="name" placeholder="Anonymous" size="28"></td>
+        </tr>
+        <tr>
+            <td><strong>Email</strong></td>
+            <td><input type="email" name="email" size="28"></td>
+        </tr>
+        <tr>
+            <td><strong>Subject</strong></td>
+            <td><input type="text" name="subject" size="35"></td>
+        </tr>
+        <tr>
+            <td><strong>Comment</strong></td>
+            <td><textarea name="comment" rows="4" cols="48"></textarea></td>
+        </tr>
+        <tr>
+            <td><strong>File</strong></td>
+            <td><input type="file" name="file" accept="image/*,video/*"></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><input type="submit" value="New Thread"></td>
+        </tr>
+    </table>
+</form>
+
+<!-- Threads List -->
+{% for thread in threads.items %}
+    <div class="thread">
+        <div class="post">
+            {% if thread.preview_posts %}
+                {% set op_post = thread.preview_posts[0] %}
+                <div class="post-info">
+                    <span class="subject">{{ op_post.subject or thread.subject }}</span>
+                    <span class="name">{{ op_post.name }}</span>
+                    {{ op_post.created_at.strftime('%m/%d/%y(%a)%H:%M:%S') }}
+                    <span class="post-no">No.{{ op_post.post_number }}</span>
+                    <a href="{{ url_for('thread_view', board_name=board.name, thread_id=thread.id) }}">[Reply]</a>
+                </div>
+                
+                {% if op_post.filename %}
+                    <div class="file-info">
+                        File: {{ op_post.original_filename }} ({{ op_post.file_size }} bytes)
+                    </div>
+                    <img src="{{ url_for('static', filename='uploads/' + op_post.filename) }}" 
+                         class="thumbnail" alt="Image">
+                {% endif %}
+                
+                <div class="comment">{{ op_post.comment | safe }}</div>
+            {% else %}
+                <div class="post-info">
+                    <span class="subject">{{ thread.subject }}</span>
+                    <span class="name">Anonymous</span>
+                    {{ thread.created_at.strftime('%m/%d/%y(%a)%H:%M:%S') }}
+                    <a href="{{ url_for('thread_view', board_name=board.name, thread_id=thread.id) }}">[Reply]</a>
+                </div>
+            {% endif %}
+            
+            {% if thread.total_posts > 1 %}
+                <div style="margin-top: 8px; font-size: 9pt;">
+                    {{ thread.total_posts - 1 }} replies
+                    {% if thread.preview_posts|length > 1 %}
+                        - Last {{ thread.preview_posts|length - 1 }} replies shown
+                    {% endif %}
+                </div>
+                
+                {% for post in thread.preview_posts[1:] %}
+                    <div class="post" style="margin-left: 16px; border-left: 2px solid #D6DAF0; padding-left: 8px;">
+                        <div class="post-info">
+                            <span class="name">{{ post.name }}</span>
+                            {{ post.created_at.strftime('%m/%d/%y(%a)%H:%M:%S') }}
+                            <span class="post-no">No.{{ post.post_number }}</span>
+                        </div>
+                        {% if post.filename %}
+                            <img src="{{ url_for('static', filename='uploads/' + post.filename) }}" 
+                                 class="thumbnail" alt="Image">
+                        {% endif %}
+                        <div class="comment">{{ post.comment | safe }}</div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+{% endfor %}
+
+<!-- Pagination -->
+{% if threads.pages > 1 %}
+    <div style="text-align: center; margin: 16px 0;">
+        {% if threads.has_prev %}
+            <a href="{{ url_for('board_view', board_name=board.name, page=threads.prev_num) }}">[Previous]</a>
+        {% endif %}
+        
+        Page {{ threads.page }} of {{ threads.pages }}
+        
+        {% if threads.has_next %}
+            <a href="{{ url_for('board_view', board_name=board.name, page=threads.next_num) }}">[Next]</a>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}
